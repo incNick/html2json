@@ -1,0 +1,17 @@
+{
+  "name": "html2json",
+  "version": "0.1",
+  "homepage": "https://github.com/incNick/html2json",
+  "authors": [
+    "incNick, Tian Jin, China"
+  ],
+  "description": "jQuery plug-in, translate html to json or opponent",
+  "main": ["js/html2json.js"],
+  "keywords": [
+    "nick",
+    "html2json",
+    "json2html",
+    "jquery"
+  ],
+  "license": "MIT"
+}
