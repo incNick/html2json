@@ -191,14 +191,18 @@
                 if ($.isArray(elements)) {
                     var format = [];
                     for (var i = 0, l = elements.length; i < l; i ++) {
-                        format.push(parseJQueryElement(elements[i], totalTags, jsonTemplate));
+                        var _subFormat = parseJQueryElement(elements[i], totalTags, jsonTemplate);
+                        if (_subFormat !== false) format.push(_subFormat);
                     }
                 } else {
-                    var format = {}, element = $(elements), key = false;
-                    if (element[0].nodeName === '#text') {
-                        format = {_ref_: '_text_', _value_: element[0].nodeValue};
+                    var format = {}, element = elements, key = false;
+                    if (element.nodeName === '#text') {
+                        element.nodeValue = element.nodeValue.replace(/^( |\t)+|( |\t)+$/g, '');
+                        if (element.nodeValue.length < 1) return false;
+                        return {_ref_: '_text_', _value_: element.nodeValue};
                     } else {
-                        var tagName = element[0].tagName.toLowerCase();
+                        var tagName = element.tagName.toLowerCase();
+                        element = $(element);
                         if (element.attr('_juid_')) {
                             key = element.attr('_juid_');
                         } else {
