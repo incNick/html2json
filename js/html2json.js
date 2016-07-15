@@ -3,7 +3,7 @@
  * 
  *    /\_/\             HTML to JSON 
  *  ( ^ v ^ )_______    Author: Nick, Tian Jin, China 
- * (~) Version: 1.0 ()  License: MIT
+ * (~) Version: 2.0 ()  License: MIT
  * 
  * ****************************************************************************
  * 2016.07.14           https://github.com/incNick/html2json 
@@ -59,10 +59,10 @@
                     eval('source._init_' + target + '[' + latest + ']._child_.push(format)');
                     break;
                 case 'before':
-                    eval('source._init_' + target + '.splice(' + (latest - 1) + ', 0, format)');
+                    eval('source._init_' + target + '.splice(' + latest + ', 0, format)');
                     break;
                 case 'after':
-                    eval('source._init_' + target + '.splice(' + latest + ', 0, format)');
+                    eval('source._init_' + target + '.splice(' + (latest + 1) + ', 0, format)');
                     break;
                 case 'remove':
                     eval('source._init_' + target + '.splice(' + latest + ', 1)');
@@ -80,9 +80,6 @@
             var template = $.extend(true, {}, jsonTemplate);
             var format = template._init_, element = $('<div></div>');
             delete template._init_;
-            for (var key in template) {
-                template[key] = optionsToHtml(template[key]);
-            }
             jQueryElement(format, template, element);
             if (returnObject) return element.children();
             return element.html();
@@ -102,15 +99,28 @@
                     }
                 } else {
                     if (node._ref_ === '_text_') {
-                        var element = document.createTextNode(node._value_);
+                        element = formatText(node._value_);
+                    } else if (node._ref === '_html_') {
+                        element = $(node._value_);
                     } else {
-                        var element = $(jsonTemplate[node._ref_]);
+                        var element = $(optionsToHtml(node._ref_, jsonTemplate[node._ref_], node));
                         if (node._child_)    {
                             jQueryElement(node._child_, jsonTemplate, element);
                         }
                     }
                     parentNode.append(element);
                 }
+            }
+            
+            /**
+             * Format text
+             * @param string str
+             * @return string
+             */
+            function formatText(str) {
+                var div = document.createElement("div");
+                div.innerHTML = str;
+                return div.innerText;
             }
 
             /**
@@ -119,38 +129,39 @@
              * @param Array|Object      jsonTemplate
              * @return string
              */
-            function optionsToHtml(jsonTemplate) {
+            function optionsToHtml(tagKey, jsonTemplate, settings) {
                 var html = '';
-                if ($.isArray(jsonTemplate)) {
-                    for (var i = 0, l = jsonTemplate.length; i < l; i ++) {
-                        html += optionsToHtml(jsonTemplate[i]);
-                    }
-                } else {
-                    for (var tag in jsonTemplate) {
-                        var text = false;
-                        var attributes = [];
-                        for (var attribute in jsonTemplate[tag]) {
-                            if (attribute === '_text_') {
-                                text = jsonTemplate[tag][attribute];
-                                continue;
-                            }
-                            if (jsonTemplate[tag][attribute] === false) continue;
-                            if (jsonTemplate[tag][attribute] === true) {
-                                attributes.push(attribute + '="' + attribute + '"');
-                            } else {
-                                attributes.push(attribute + '="' + jsonTemplate[tag][attribute] + '"');
-                            }
+                for (var tag in jsonTemplate) {
+                    var innerContent = '';
+                    var attributes = ['_juid_="' + tagKey + '"'];
+                    var options = {};
+                    $.extend(options, jsonTemplate[tag], settings);
+                    for (var attribute in options) {
+                        if (attribute === '_text_') {
+                            innerContent += formatText(options[attribute]);
+                            continue;
                         }
-                        attributes = attributes.join(' ');
-                        if (attributes.length > 0)  attributes = ' ' + attributes;
-                        html = '<' + tag + attributes;
-                        if ($.inArray(tag, ['input', 'img', 'br', 'hr', 'area']) > -1) {
-                            html += ' />';
+                        if (attribute === '_html_') {
+                            innerContent += options[attribute];
+                            continue;
+                        }
+                        if ((/^_.+_$/).test(attribute)) continue;
+                        if (options[attribute] === false) continue;
+                        if (options[attribute] === true) {
+                            attributes.push(attribute + '="' + attribute + '"');
                         } else {
-                            html += '>';
-                            if (text !== false) html += text;
-                            html += '</' + tag + '>';
+                            attributes.push(attribute + '="' + options[attribute] + '"');
                         }
+                    }
+                    attributes = attributes.join(' ');
+                    if (attributes.length > 0)  attributes = ' ' + attributes;
+                    html = '<' + tag + attributes;
+                    if ($.inArray(tag, ['input', 'img', 'br', 'hr', 'area']) > -1) {
+                        html += ' />';
+                    } else {
+                        html += '>';
+                        if (innerContent !== '') html += innerContent;
+                        html += '</' + tag + '>';
                     }
                 }
                 return html;
@@ -183,19 +194,23 @@
                         format.push(parseJQueryElement(elements[i], totalTags, jsonTemplate));
                     }
                 } else {
-                    var format = {};
-                    var element = $(elements);
+                    var format = {}, element = $(elements), key = false;
                     if (element[0].nodeName === '#text') {
                         format = {_ref_: '_text_', _value_: element[0].nodeValue};
                     } else {
                         var tagName = element[0].tagName.toLowerCase();
-                        if (! totalTags[tagName]) totalTags[tagName] = 0;
-                        totalTags[tagName] ++;
-                        var key = tagName + totalTags[tagName].toString();
+                        if (element.attr('_juid_')) {
+                            key = element.attr('_juid_');
+                        } else {
+                            if (! totalTags[tagName]) totalTags[tagName] = 0;
+                            totalTags[tagName] ++;
+                            key = tagName + totalTags[tagName].toString();
+                        }
                         var attributes = element[0].attributes;
                         jsonTemplate[key] = {};
                         jsonTemplate[key][tagName] = {};
                         for (var i = 0, l = attributes.length; i < l; i ++) {
+                            if (attributes[i].nodeName == '_juid_') continue;
                             jsonTemplate[key][tagName][attributes[i].nodeName] = attributes[i].nodeValue;
                         }
                         format._ref_ = key;

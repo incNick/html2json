@@ -10,89 +10,108 @@ It is mean you can manage the HTML format same as Array management.
 ## Why create it? ##
 We build one complex angularJS Directives and used same complex template, too many ng-if used, so I think may use jQuery build it then `$compile(angular.element(ourElement).contents())($scope);` is better way.
 
-## Standard JSON format ##
+## How to use it ##
 ```
+
 var jsonTemplate = {
-    'uniqueKeyOfHtmlElementNode1': { //Don't name it is number, unique
-        'tagName': { //Html tag name
-            'attributeName1': 'attributeValue', //Attribute value always quote by Double quotes
-            'attributeName2': 'attributeValue'
-            //...
+    'title': { //Don't name it is number, unique key
+        'h1': { //Html tag name
+            'style'     : 'color: green', //Attribute value always quote by Double quotes
+            '_text_'    : 'HTML 2 JSON' //Default innerText
         }
     },
-    'uniqueKeyOfHtmlElementNode2': {
-        'tagName': {
-            'attributeName1': 'attributeValue',
-            'attributeName2': 'attributeValue'
-            //...
+    'content': {
+        'div': {
+            '_html_': '<strong>Default content</strong>', //Default innerHTML
         }
     },
-    //...
-    '_init_': [{ //The element tree, if your tree only has one root node, can define _init_: {}, else then _init_: []
-        '_ref_'     : 'uniqueKeyOfHtmlElementNode1',
-        '_child_'   : [{    //_child_ attribute should be []
-            '_ref_'     : 'uniqueKeyOfHtmlElementNode2',
+    'foot-hr': {
+        'hr': {
+            'style': 'border-color: green'
+        },
+    }, 
+    'foot-p': {
+        'p': {}
+    },
+    '_init_': [{ //The element tree
+        '_ref_': 'title'
+    },{
+        '_ref_'     : 'content',
+        '_html_'    : '<strong>Author:</strong><span style="margin-left: 2em;">Nick</span><p>Version 2.0</p>', //override attribute
+        '_child_'   : [{
+            '_ref_' : 'foot-hr'
+        }, {
+            '_ref_'     : 'foot-p',
+            'style' : 'color: white; background: black',
             '_child_'   : [{
-                '_ref_'     : '_text_', //_text_ mean it is text node
-                '_value_'   : 'HTML to JSON'
+                '_ref_'     : '_text_',
+                '_value_'   : 'Version 2.0'
+            }, {
+                '_ref_'     : '_html_',
+                '_value_'   : '<span style="margin-left: 2em;">MIT LICENSE</span>'
             }]
         }]
     }]
 };
-```
 
-## How to use it ##
-```
 /* Json to Html */
 var html = $.html2json.parseJsonTemplate(jsonTemplate);
-/*	The html source should be like (but not formatted)
-<tagName attributeName1="attributeValue" attributeName2="attributeValue">
-	<tagName attributeName1="attributeValue" attributeName2="attributeValue">
-		HTML to JSON
-	</tagName>
-</tagName>
-*/
+$('body').append(html);
 
-/* Update json template
+/* HTML string to JSON */
+console.log($.html2json.toJsonTemplate(html));
+
+/* Update json template */
 var newJsonTemplateSection = {
-    'strong': {
-        'h1': {
-            'style': 'color: #00f'
+    'title': { //Don't name it is number, unique key
+        'h1': { //Html tag name
+            'style'     : 'color: blue', //Attribute value always quote by Double quotes
+            '_text_'    : 'JSON 2 HTML'
+        }
+    },
+    'foot-hr': {
+        'hr': {
+            'style': 'border-color: blue'
+        },
+    },
+    'notice': {
+        'p': {
+            'style'     : 'color: #00f',
+            '_text_'    : '2016.07.15'
         }
     },
     '_init_': [{
-        '_ref_'     : 'strong',
-        '_child_'   : [{
-            '_ref_'     : '_text_', //_text_ mean it is text node
-            '_value_'   : 'Hello World!'
-        }]
+        '_ref_'     : 'notice'
+    }, {
+      '_ref_'       : 'foot-hr',
+      'style'       : 'border-color: red;'
     }]
 };
-$.html2json.updateJsonTemplate(
-    jsonTemplate, newJsonTemplateSection, 
-    'uniqueKeyOfHtmlElementNode1/uniqueKeyOfHtmlElementNode2');
+$.html2json.updateJsonTemplate( jsonTemplate, newJsonTemplateSection, 'content/foot-p', 'after');
 
 /* Json to jQuery HTML elements */
 var elements = $.html2json.parseJsonTemplate(jsonTemplate, true);
-/*	The html source should be like (but not formatted)
-<tagName attributeName1="attributeValue" attributeName2="attributeValue">
-	<tagName attributeName1="attributeValue" attributeName2="attributeValue">
-		<h1>
-			Hello World!
-		</h1>
-	</tagName>
-</tagName>
-*/
-
-/* HTML string to JSON */
-var jsonObject1 = $.html2json.toJsonTemplate(html);
+$('body').append(elements);
 
 /* Elements to JSON */
 var jsonObject2 = $.html2json.toJsonTemplate(elements);
-
-console.log(html);
-console.log(jsonTemplate);
-console.log(elements);
-console.log(jsonObject1);
 console.log(jsonObject2);
 ```
+
+----------
+
+**Update log**
+V 0.1: 
+
+>1. Use $.parseJsonTemplate get HTML and use $.fn.toJsonTemplate get JSON
+
+V 1.0: 
+>1. Package function to html2json.
+>2. Use $.html2json.parseJsonTemplate and $.html2json.toJsonTemplate instead original.
+>3. Add updateJsonTemp feature.
+
+V 2.0:
+>1. Add key word _html_ support.
+>2. Add attribute _juid_ at final html, so if translate the html to json again, the unique key same as original. In fact, it is mean you can write source by HTML format and set _juid_ there instead write too complex JSON.
+>3. Update core logic, support the defined element multiple use in _init_ section.
+	
