@@ -111,7 +111,7 @@ V 1.0:
 >3. Add updateJsonTemp feature.
 
 V 2.0:
->1. Add key word _html_ support.
->2. Add attribute _juid_ at final html, so if translate the html to json again, the unique key same as original. In fact, it is mean you can write source by HTML format and set _juid_ there instead write too complex JSON.
->3. Update core logic, support the defined element multiple use in _init_ section.
+>1. Add key word `_html_` support.
+>2. Add attribute `_juid_` at final html, so if translate the html to json again, the unique key same as original. In fact, it is mean you can write source by HTML format and set `_juid_` there instead write too complex JSON.
+>3. Update core logic, support the defined element multiple use in `_init_` section.
 	
