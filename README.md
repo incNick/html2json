@@ -15,26 +15,23 @@ We build one complex angularJS Directives and used same complex template, too ma
 
 var jsonTemplate = {
     'title': { //Don't name it is number, unique key
-        'h1': { //Html tag name
-            'style'     : 'color: green', //Attribute value always quote by Double quotes
-            '_text_'    : 'HTML 2 JSON' //Default innerText
-        }
+        '_tag_'	    : 'h1', //HTML tag
+        'style'     : 'color: green', //Attribute value always quote by Double quotes
+        '_text_'    : 'HTML 2 JSON' //Default innerText
     },
     'content': {
-        'div': {
-            '_html_': '<strong>Default content</strong>', //Default innerHTML
-        }
+        '_tag_'	    : 'div',
+	'_html_'    : '<strong>Default content</strong>' //Default innerHTML
     },
     'foot-hr': {
-        'hr': {
-            'style': 'border-color: green'
-        },
+        '_tag_'     : 'hr',
+        'style'     : 'border-color: green'
     }, 
     'foot-p': {
-        'p': {}
+        '_tag_'     : 'p'
     },
     '_init_': [{ //The element tree
-        '_ref_': 'title'
+            '_ref_': 'title'
     },{
         '_ref_'     : 'content',
         '_html_'    : '<strong>Author:</strong><span style="margin-left: 2em;">Nick</span><p>Version 2.0</p>', //override attribute
@@ -64,21 +61,18 @@ console.log($.html2json.toJsonTemplate(html));
 /* Update json template */
 var newJsonTemplateSection = {
     'title': { //Don't name it is number, unique key
-        'h1': { //Html tag name
-            'style'     : 'color: blue', //Attribute value always quote by Double quotes
-            '_text_'    : 'JSON 2 HTML'
-        }
+        '_tag_'     : 'h1',
+        'style'     : 'color: blue',
+        '_text_'    : 'JSON 2 HTML'
     },
     'foot-hr': {
-        'hr': {
-            'style': 'border-color: blue'
-        },
+        '_tag_'     : 'hr',
+        'style': 'border-color: blue'
     },
     'notice': {
-        'p': {
-            'style'     : 'color: #00f',
-            '_text_'    : '2016.07.15'
-        }
+        '_tag_'     : 'p',
+        'style'     : 'color: #00f',
+        '_text_'    : '2016.07.15'
     },
     '_init_': [{
         '_ref_'     : 'notice'
@@ -115,3 +109,6 @@ V 2.0:
 >2. Add attribute `_juid_` at final html, so if translate the html to json again, the unique key same as original. In fact, it is mean you can write source by HTML format and set `_juid_` there instead write too complex JSON.
 >3. Update core logic, support the defined element multiple use in `_init_` section.
 	
+V 3.0:
+>1. Add key work `_tag_` support. Original element json format like {key: {tagName: {attributes...}}}, now use {key: {_tag_: tagName, attributes...}} instead it, it is mean you can make change tagName easier.
+>2. Fix bug

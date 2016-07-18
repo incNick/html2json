@@ -1,11 +1,25 @@
 {
-  "name": "html2json",
-  "version": "2.0",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/incNick/html2json"
-  }
+    "name": "html2json",
+    "version": "3.0",
+    "author": "Nick, Tian Jin, China",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/incNick/html2json/issues"
+    },
+    "homepage": "https://github.com/incNick/html2json#readme"
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/incNick/html2json"
+    },
+    "keywords": [
+        "json2html",
+	"html2json",
+	"jQuery plugin"
+    ],
+    "dependencies": {
+        "jQuery": "^1.9.1",
+    }
 }

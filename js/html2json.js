@@ -3,7 +3,7 @@
  * 
  *    /\_/\             HTML to JSON 
  *  ( ^ v ^ )_______    Author: Nick, Tian Jin, China 
- * (~) Version: 2.0 ()  License: MIT
+ * (~) Version: 3.0 ()  License: MIT
  * 
  * ****************************************************************************
  * 2016.07.14           https://github.com/incNick/html2json 
@@ -100,7 +100,7 @@
                 } else {
                     if (node._ref_ === '_text_') {
                         element = formatText(node._value_);
-                    } else if (node._ref === '_html_') {
+                    } else if (node._ref_ === '_html_') {
                         element = $(node._value_);
                     } else {
                         var element = $(optionsToHtml(node._ref_, jsonTemplate[node._ref_], node));
@@ -126,44 +126,45 @@
             /**
              * Translate json node to html source
              * 
+             * @param string            tagKey
              * @param Array|Object      jsonTemplate
+             * @param Object            settings
              * @return string
              */
             function optionsToHtml(tagKey, jsonTemplate, settings) {
                 var html = '';
-                for (var tag in jsonTemplate) {
-                    var innerContent = '';
-                    var attributes = ['_juid_="' + tagKey + '"'];
-                    var options = {};
-                    $.extend(options, jsonTemplate[tag], settings);
-                    for (var attribute in options) {
-                        if (attribute === '_text_') {
-                            innerContent += formatText(options[attribute]);
-                            continue;
-                        }
-                        if (attribute === '_html_') {
-                            innerContent += options[attribute];
-                            continue;
-                        }
-                        if ((/^_.+_$/).test(attribute)) continue;
-                        if (options[attribute] === false) continue;
-                        if (options[attribute] === true) {
-                            attributes.push(attribute + '="' + attribute + '"');
-                        } else {
-                            attributes.push(attribute + '="' + options[attribute] + '"');
-                        }
-                    }
-                    attributes = attributes.join(' ');
-                    if (attributes.length > 0)  attributes = ' ' + attributes;
-                    html = '<' + tag + attributes;
-                    if ($.inArray(tag, ['input', 'img', 'br', 'hr', 'area']) > -1) {
-                        html += ' />';
-                    } else {
-                        html += '>';
-                        if (innerContent !== '') html += innerContent;
-                        html += '</' + tag + '>';
-                    }
-                }
+				var innerContent = '';
+				var attributes = ['_juid_="' + tagKey + '"'];
+				var options = {};
+				$.extend(options, jsonTemplate, settings);
+				var tag = jsonTemplate._tag_;
+				for (var attribute in options) {
+					if (attribute === '_text_') {
+						innerContent += formatText(options[attribute]);
+						continue;
+					}
+					if (attribute === '_html_') {
+						innerContent += options[attribute];
+						continue;
+					}
+					if ((/^_.+_$/).test(attribute)) continue;
+					if (options[attribute] === false) continue;
+					if (options[attribute] === true) {
+						attributes.push(attribute + '="' + attribute + '"');
+					} else {
+						attributes.push(attribute + '="' + options[attribute] + '"');
+					}
+				}
+				attributes = attributes.join(' ');
+				if (attributes.length > 0)  attributes = ' ' + attributes;
+				html = '<' + tag + attributes;
+				if ($.inArray(tag, ['input', 'img', 'br', 'hr', 'area']) > -1) {
+					html += ' />';
+				} else {
+					html += '>';
+					if (innerContent !== '') html += innerContent;
+					html += '</' + tag + '>';
+				}
                 return html;
             }
         },
@@ -211,11 +212,10 @@
                             key = tagName + totalTags[tagName].toString();
                         }
                         var attributes = element[0].attributes;
-                        jsonTemplate[key] = {};
-                        jsonTemplate[key][tagName] = {};
+                        jsonTemplate[key] = {'_tag_': tagName};
                         for (var i = 0, l = attributes.length; i < l; i ++) {
                             if (attributes[i].nodeName == '_juid_') continue;
-                            jsonTemplate[key][tagName][attributes[i].nodeName] = attributes[i].nodeValue;
+                            jsonTemplate[key][attributes[i].nodeName] = attributes[i].nodeValue;
                         }
                         format._ref_ = key;
                         var childs = element.contents().toArray();
